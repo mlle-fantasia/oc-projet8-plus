@@ -108,6 +108,9 @@
 						data: data,
 					};
 					self.view.render("showEntries", data2);
+					self.view.bind("toggleAll", function (status) {
+						self.toggleAll(status.completed);
+					});
 				},
 				{},
 				"todos"

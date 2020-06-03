@@ -318,8 +318,11 @@
 				handler();
 			});
 		} else if (event === "toggleAll") {
-			console.log("self.$toggleAll", self.$toggleAll);
-			$on(self.$toggleAll, "click", function () {
+			console.log("toggleAll", document.querySelector("#toggle-all"));
+			/* qs(".toggle-all").addEventListener("click", function () {
+				console.log("coucou");
+			}); */
+			$on(qs(".toggle-all"), "click", function () {
 				console.log("this.checked", this.checked);
 				handler({ completed: this.checked });
 			});
@@ -346,14 +349,7 @@
 			self._bindItemEditDone(handler);
 		} else if (event === "itemEditCancel") {
 			self._bindItemEditCancel(handler);
-		} /* else if (event === "goList") {
-			$delegate(self.$todoList, ".view", "click", function () {
-				console.log("self._itemId(this), document.location.hash  : ", self._itemId(this), document.location.hash);
-				if (document.location.hash === "#/lists") {
-					handler({ id: self._itemId(this) }, "lists");
-				}
-			});
-		} */
+		}
 	};
 
 	// Export to window
