@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Doc: Source: model.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: model.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ *
+ * Dans un système de programmation MVC, le model gère les données de votre site. Son rôle est d'aller récupérer les informations « brutes » dans la base de données (ici le localstorage),
+ * de les organiser et de les assembler pour qu'elles puissent ensuite être traitées par le contrôleur. On y trouve donc entre autres les requêtes SQL.
+ *
+ *
+ * @module Model
+ *
+ */
+(function (window) {
+	("use strict");
+
+	/**
+	 * Creates a new Model instance and hooks up the storage.
+	 *
+	 * @constructor
+	 * @param {object} storage une instance du localstoge du client
+	 * @memberOf module:Model
+	 */
+	function Model(storage) {
+		this.storage = storage;
+	}
+
+	/**
+	 * Crée une nouvelle todo et l'a transmet au store pour l'enregistrer, une fois fait, le callback est exécuté
+	 *
+	 * @param {string} title Le titre de la todo
+	 * @param {function} callback Le callback
+	 */
+	Model.prototype.create = function (title, callback) {
+		title = title || "";
+		callback = callback || function () {};
+
+		var newItem = {
+			title: title.trim(),
+			completed: false,
+		};
+
+		this.storage.save(newItem, callback);
+	};
+
+	/**
+	 *
+	 * Cherche et retourne une todo (ou plusieurs) trouvée(s) dans le store.
+	 * Si vous ne passez pas de query passé en paramettre, la fonction retourne toutes les todo.
+	 * Si vous passez une string un nombre ou un objet, la fonction retournera la todo qui matche avec votre query
+	 *
+	 * @param {string|number|object} query A query to match models against
+	 * @param {function} callback Le callback
+	 *
+	 * @example
+	 * model.read(1, func); // retournera la todo avec l'id 1
+	 * model.read('1'); // idem
+	 * model.read({ foo: 'bar', hello: 'world' }); // retournera la todo avec 'foo' === 'bar' &amp;&amp; 'hello' === 'world'
+	 */
+	Model.prototype.read = function (query, callback) {
+		var queryType = typeof query;
+		callback = callback || function () {};
+
+		if (queryType === "function") {
+			callback = query;
+			return this.storage.findAll(callback);
+		} else if (queryType === "string" || queryType === "number") {
+			query = parseInt(query, 10);
+			this.storage.find({ id: query }, callback);
+		} else {
+			this.storage.find(query, callback);
+		}
+	};
+
+	/**
+	 * Met à jour la todo avec l'id passé en paramettre avec les data à mettre à jour, puis appelle le callback
+	 *
+	 * @param {number} id L'id de la todo
+	 * @param {object} data Les propriétés à mettre à jour et leur nouvelle valeur
+	 * @param {function} callback Le callback
+	 */
+	Model.prototype.update = function (id, data, callback) {
+		this.storage.save(data, callback, id);
+	};
+
+	/**
+	 * Supprime une todo du store
+	 *
+	 * @param {number} id L'id de la todo
+	 * @param {function} callback Le callback
+	 */
+	Model.prototype.remove = function (id, callback) {
+		this.storage.remove(id, callback);
+	};
+
+	/**
+	 * Suprime toutes les todo du store
+	 *
+	 * @param {function} callback Le callback
+	 */
+	Model.prototype.removeAll = function (callback) {
+		this.storage.drop(callback);
+	};
+
+	/**
+	 * Compte les todos qui se trouvent dans le store, les active les completed et toutes
+	 *
+	 * @param {function} callback Le callback
+	 * @returns {object} un objet avec les trois comptes dedans
+	 *
+	 * @exemple
+	 * var todos = {
+	 *   active: 2,
+	 *   completed: 3,
+	 *   total: 5,
+	 * };
+	 */
+	Model.prototype.getCount = function (callback) {
+		var todos = {
+			active: 0,
+			completed: 0,
+			total: 0,
+		};
+
+		this.storage.findAll(function (data) {
+			data.forEach(function (todo) {
+				if (todo.completed) {
+					todos.completed++;
+				} else {
+					todos.active++;
+				}
+
+				todos.total++;
+			});
+			callback(todos);
+		});
+	};
+
+	// Export to window
+	window.app = window.app || {};
+	window.app.Model = Model;
+})(window);
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Accueil</a></h2><h3>Modules</h3><ul><li><a href="module-Controller.html">Controller</a></li><li><a href="module-Helpers.module_Helpers.html">Helpers</a></li><li><a href="module-Model.html">Model</a></li><li><a href="module-Store.html">Store</a></li><li><a href="module-Template.html">Template</a></li><li><a href="module-View.module_View.html">View</a></li></ul><h3>Classes</h3><ul><li><a href="module-Controller.Controller.html">Controller</a></li><li><a href="module-Model.Model.html">Model</a></li><li><a href="module-Template.Template.html">Template</a></li><li><a href="module-View.View.html">View</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Thu May 21 2020 12:17:17 GMT+0200 (GMT+02:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

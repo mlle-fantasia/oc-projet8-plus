@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en" data-framework="javascript">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0">
+	<meta name="description" content="Application de gestion de tâches" />
+	<title>To-do list app</title>
+	<link rel="stylesheet" href="node_modules/todomvc-common/base.css">
+	<link rel="stylesheet" href="node_modules/todomvc-app-css/index.css">
+	<link rel="icon" href="favicon.ico">
+</head>
+
+<body>
+	<section class="todoapp">
+		<header class="header">
+			<h1 class="title">todos</h1>
+			<div class="container-new-todo">
+				<span class="add-item"></span>
+				<label class="label-new-todo" for="new-todo">Que devez-vous faire ?</label>
+				<input class="new-todo" placeholder="Que devez-vous faire ?" id="new-todo" autofocus>
+			</div>
+		</header>
+		<section class="main">
+			<section class="section-toggle-all">
+				<label class="container" for="toggle-all">Marquer toutes les todos à faites
+					<input class="toggle-all" id="toggle-all" type="checkbox">
+					<span class="toggle-all checkmark"></span>
+				</label>
+				<div class="clear-completed">Supprimer les faites</div>
+			</section>
+			<ul class="todo-list"></ul>
+		</section>
+		<footer class="footer">
+			<span class="todo-count"></span>
+			<ul class="filters">
+				<!-- <li>
+					<a href="#/" class="selected">toutes</a>
+				</li>
+				<li>
+					<a href="#/active">Actives</a>
+				</li>
+				<li>
+					<a href="#/completed">faites</a>
+				</li> -->
+			</ul>
+			<div class="btn-show-list"></div>
+		</footer>
+	</section>
+	<footer class="info">
+		<p>Double-click pour éditer une todo ou une liste</p>
+		<p>Créé pas Oscar Godson</p>
+		<p>Refactorisé by Christoph Burgmer</p>
+		<p>Amélioré pas Marina Front</p>
+	</footer>
+	<script src="node_modules/todomvc-common/base.js"></script>
+	<script src="js/helpers.js"></script>
+	<script src="js/store.js"></script>
+	<script src="js/model.js"></script>
+	<script src="js/template.js"></script>
+	<script src="js/view.js"></script>
+	<script src="js/controller.js"></script>
+	<script src="js/app.js"></script>
+</body>
+
+</html>
