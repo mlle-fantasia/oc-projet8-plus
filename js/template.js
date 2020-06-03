@@ -170,6 +170,15 @@
 			objData.todoCount = this.itemCounter(data.data);
 		}
 
+		if (data.titleList) {
+			let date = data.dateList ? data.dateList : "";
+			objData.toggleAll =
+				'<label class="label-date" for="date">Date : </label>' +
+				'<input class="new-date" type="date" id="start" name="trip-start" value=' +
+				date +
+				">";
+		}
+
 		return objData;
 	};
 

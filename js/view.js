@@ -318,7 +318,9 @@
 				handler();
 			});
 		} else if (event === "toggleAll") {
+			console.log("self.$toggleAll", self.$toggleAll);
 			$on(self.$toggleAll, "click", function () {
+				console.log("this.checked", this.checked);
 				handler({ completed: this.checked });
 			});
 		} else if (event === "itemEdit") {

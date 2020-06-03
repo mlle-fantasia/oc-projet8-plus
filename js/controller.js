@@ -58,10 +58,6 @@
 		self.view.bind("toggleAll", function (status) {
 			self.toggleAll(status.completed);
 		});
-
-		/* self.view.bind("goList", function (data) {
-			console.log("data", data);
-		}); */
 	}
 
 	/**
@@ -72,25 +68,13 @@
 	 */
 	Controller.prototype.setView = function (locationHash) {
 		var self = this;
-		//todo date liste
-		self.model.read(
-			function (lists) {
-				for (let i = 0; i < lists.length; i++) {
-					const list = lists[i];
-					console.log("list.date ,  new Date()", list.date, new Date());
-					if (list.date && list.date === new Date()) {
-					}
-				}
-			},
-			{},
-			"lists"
-		);
 
 		var tabroute = locationHash.split("/");
 		var route = tabroute[1];
 		var page = route || "";
 		var list_id = "";
 		if (tabroute[2]) list_id = tabroute[2];
+
 		this._updateFilterState(page, list_id);
 	};
 
@@ -111,6 +95,7 @@
 						type: "todos",
 						data: data[0].todos,
 					};
+					if (data[0].date) data2.dateList = data[0].date;
 					self.view.render("showEntries", data2);
 				},
 				"lists"
@@ -363,6 +348,7 @@
 		self.model.read(
 			{ completed: !completed },
 			function (data) {
+				console.log("data", data);
 				data.forEach(function (item) {
 					self.toggleComplete(item.id, completed, true);
 				});
@@ -433,12 +419,37 @@
 	Controller.prototype._updateFilterState = function (currentPage, list_id) {
 		// Store a reference to the active route, allowing us to re-filter todo
 		// items as they are marked complete or incomplete.
+		var self = this;
 		this._activeRoute = currentPage;
 		this._listId = list_id ? list_id : "";
 
 		if (currentPage === "") {
 			this._activeRoute = "All";
 		}
+		console.log("coucou");
+		self.model.read(
+			function (lists) {
+				console.log("lists", lists);
+				for (let i = 0; i < lists.length; i++) {
+					const list = lists[i];
+					let dateNow = new Date();
+					dateNow.setHours(0, 0, 0, 0);
+					list.date = new Date(list.date);
+					if (list.date) list.date.setHours(0, 0, 0, 0);
+					if (list.date && list.listCopiee === "false" && list.date.getTime() === dateNow.getTime()) {
+						console.log("list", list);
+						for (let i = 0; i < list.todos.length; i++) {
+							const todo = list.todos[i];
+							todo.type = "todos";
+							self.addItem(todo);
+						}
+						self.model.update(list.id, "lists", { listCopiee: "true" }, function () {});
+					}
+				}
+			},
+			{},
+			"lists"
+		);
 
 		this._filter();
 		if (currentPage !== "lists") {
