@@ -47,8 +47,8 @@
 			self.removeItem(item.id, type);
 		});
 
-		self.view.bind("itemToggle", function (item) {
-			self.toggleComplete(item.id, item.completed);
+		self.view.bind("itemToggle", function (item, type) {
+			self.toggleComplete(item.id, item.completed, false, type);
 		});
 
 		self.view.bind("removeCompleted", function () {
@@ -329,9 +329,9 @@
 	 * @param {boolean} completed statut de la todo 'completed' ou non
 	 * @param {boolean|undefined} silent si undefined re-filtre les todos
 	 */
-	Controller.prototype.toggleComplete = function (id, completed, silent) {
+	Controller.prototype.toggleComplete = function (id, completed, silent, type) {
 		var self = this;
-		self.model.update(id, "todos", { completed: completed }, function () {
+		self.model.update(id, type, { completed: completed }, function () {
 			self.view.render("elementComplete", {
 				id: id,
 				completed: completed,
@@ -355,7 +355,7 @@
 			function (data) {
 				console.log("data", data);
 				data.forEach(function (item) {
-					self.toggleComplete(item.id, completed, true);
+					self.toggleComplete(item.id, completed, true, "todos");
 				});
 			},
 			"todos"

@@ -344,10 +344,15 @@
 			});
 		} else if (event === "itemToggle") {
 			$delegate(self.$todoList, ".toggle", "click", function () {
-				handler({
-					id: self._itemId(this),
-					completed: this.checked,
-				});
+				let type = document.location.hash === "" || document.location.hash.split("/")[1] !== "lists" ? "todos" : "lists";
+				if (type === "lists" && document.location.hash.split("/")[2]) type = document.location.hash.split("/")[2];
+				handler(
+					{
+						id: self._itemId(this),
+						completed: this.checked,
+					},
+					type
+				);
 			});
 		} else if (event === "itemEditDone") {
 			self._bindItemEditDone(handler);
