@@ -65,11 +65,20 @@
 	 * @memberOf module:Template
 	 */
 	function Template() {
-		this.defaultTemplate =
-			'&lt;li data-id="{{id}}" class="{{completed}}">' +
+		this.todoTemplate =
+			'&lt;li data-id="{{id}}" class="item {{completed}}">' +
 			'&lt;div class="view">' +
 			'&lt;input class="toggle" type="checkbox" {{checked}}>' +
 			"&lt;label>{{title}}&lt;/label>" +
+			'&lt;button class="destroy">&lt;/button>' +
+			"&lt;/div>" +
+			"&lt;/li>";
+
+		this.listTemplate =
+			'&lt;li data-id="{{id}}" class="item">' +
+			'&lt;div class="view">' +
+			"&lt;label>{{title}} &lt;span class='date-list'>{{date}}&lt;/span> &lt;/label>" +
+			'&lt;a href="#/lists/{{link-id}}" class="edit-list">&lt;/a>' +
 			'&lt;button class="destroy">&lt;/button>' +
 			"&lt;/div>" +
 			"&lt;/li>";
@@ -78,7 +87,7 @@
 	/**
 	 * Crée une &lt;li> HTML string et la retourne.
 	 *
-	 * NOTE: Normalement, il faut utiliser un moter de template tel que Mustache ou Handlebar, mais, ce projet est un exemple en vanilla JS.
+	 * NOTE: Normalement, il faut utiliser un moteur de template tel que Mustache ou Handlebar, mais, ce projet est un exemple en vanilla JS.
 	 *
 	 * @param {array} data array de todo à afficher
 	 * @returns {string} HTML String &lt;li>
@@ -91,38 +100,132 @@
 	 * });
 	 */
 	Template.prototype.show = function (data) {
-		var i, l;
 		var view = "";
-		//console.log("data", data);
+		if (data.type === "lists") {
+			for (var i = 0; i &lt; data.data.length; i++) {
+				var list = data.data[i];
+				var template = this.listTemplate;
 
-		for (i = 0, l = data.length; i &lt; l; i++) {
-			var template = this.defaultTemplate;
-			var completed = "";
-			var checked = "";
+				template = template.replace("{{id}}", list.id);
+				template = template.replace("{{link-id}}", list.id);
+				template = template.replace("{{title}}", escape(list.title));
+				if (list.date) template = template.replace("{{date}}", " Pour le : " + list.date);
+				else template = template.replace("{{date}}", "");
 
-			if (data[i].completed) {
-				completed = "completed";
-				checked = "checked";
+				view = view + template;
 			}
+		} else {
+			for (var i = 0; i &lt; data.data.length; i++) {
+				var todo = data.data[i];
+				var template = this.todoTemplate;
+				var completed = "";
+				var checked = "";
 
-			template = template.replace("{{id}}", data[i].id);
-			template = template.replace("{{title}}", escape(data[i].title));
-			template = template.replace("{{completed}}", completed);
-			template = template.replace("{{checked}}", checked);
+				if (todo.completed) {
+					completed = "completed";
+					checked = "checked";
+				}
 
-			view = view + template;
+				template = template.replace("{{id}}", todo.id);
+				template = template.replace("{{title}}", escape(todo.title));
+				template = template.replace("{{completed}}", completed);
+				template = template.replace("{{checked}}", checked);
+
+				view = view + template;
+			}
 		}
 
 		return view;
 	};
 
 	/**
+	 *
+	 * Retourne un objet avec les données à afficher sur la vue en fonction si on affiche les todos ou les listes
+	 *
+	 * @param {array} data array de todo
+	 * @returns {object} objData = {
+			title: "",
+			newTodo:"",
+			toggleAll: "",
+			inputNew: "",
+			clearCompleted: "",
+			todoList: "",
+			filters: "",
+			btnShowList: "",
+			todoCount: "",
+		};
+	 *
+	 */
+	Template.prototype.getDataToShow = function (data) {
+		var date = new Date();
+		var objData = {
+			title: "",
+			newTodo: "",
+			toggleAll: "",
+			inputNew: "",
+			clearCompleted: "",
+			todoList: this.show(data),
+			filters: "",
+			btnShowList: "",
+			todoCount: "",
+		};
+		if (data.type === "lists") {
+			objData.title = "Les listes";
+			objData.newTodo = "new-list";
+			objData.inputNew = "Ajouter un liste";
+			objData.toggleAll =
+				'&lt;label class="label-date" for="date">Date : &lt;/label>' +
+				'&lt;input class="new-date" type="date" id="start" name="trip-start" value=' +
+				date +
+				">";
+			objData.btnShowList = '&lt;a href="#/">Les todos&lt;/a>';
+		} else {
+			objData.title = "Todos";
+			objData.newTodo = "new-todo";
+			objData.inputNew = "Que devez-vous faire ?";
+			objData.toggleAll =
+				'&lt;label class="container" for="toggle-all">Marquer toutes les todos à faites' +
+				'&lt;input class="toggle-all" id="toggle-all" type="checkbox">' +
+				'&lt;span class="toggle-all checkmark">&lt;/span>' +
+				"&lt;/label>";
+			objData.clearCompleted = this.clearCompletedButton(data.data);
+			objData.filters =
+				'&lt;li>&lt;a href="#/" class="selected">toutes&lt;/a>&lt;/li>' +
+				'&lt;li>&lt;a href="#/active">Actives&lt;/a>&lt;/li>' +
+				'&lt;li>&lt;a href="#/completed">faites&lt;/a>&lt;/li>';
+			objData.btnShowList = '&lt;a href="#/lists">Les listes&lt;/a>';
+			objData.todoCount = this.itemCounter(data.data);
+		}
+
+		if (data.titleList) {
+			let date = data.dateList ? data.dateList : "";
+			objData.toggleAll =
+				'&lt;label class="label-date" for="date">Date : &lt;/label>' +
+				'&lt;input class="new-date" type="date" id="start" name="trip-start" value=' +
+				date +
+				">";
+			objData.todoCount = "";
+			objData.filters = "";
+		}
+
+		return objData;
+	};
+
+	/**
 	 * Affiche le nombre de todos actives
 	 *
-	 * @param {number} activeTodos Le nombre de todos actives.
+	 * @param {number | array} activeTodos Le nombre de todos actives ou le tableau des todos.
 	 * @returns {string} String HTML qui contient le nombre
 	 */
 	Template.prototype.itemCounter = function (activeTodos) {
+		if (Array.isArray(activeTodos)) {
+			let todoActive = 0;
+			for (let i = 0; i &lt; activeTodos.length; i++) {
+				const todo = activeTodos[i];
+				if (!todo.completed) todoActive++;
+			}
+			activeTodos = todoActive;
+		}
 		var plural = activeTodos === 1 ? "" : "s";
 
 		return "&lt;strong>" + activeTodos + "&lt;/strong> todo" + plural + " active" + plural;
@@ -130,12 +233,20 @@
 
 	/**
 	 *
-	 * Met à jour le texte "Suplimer les faites" ou ""
+	 * Met à jour le texte "Supprimer les faites" ou ""
 	 *
-	 * @param   completedTodos Le nombre de todos completed.
+	 * @param  {number | array} completedTodos Le nombre de todos completed ou le tableau des todos.
 	 * @returns {string} le texte à afficher : "Suplimer les faites" | ""
 	 */
 	Template.prototype.clearCompletedButton = function (completedTodos) {
+		if (Array.isArray(completedTodos)) {
+			let todocompleted = 0;
+			for (let i = 0; i &lt; completedTodos.length; i++) {
+				const todo = completedTodos[i];
+				if (todo.completed) todocompleted++;
+			}
+			completedTodos = todocompleted;
+		}
 		if (completedTodos > 0) {
 			return "Supprimer les faites";
 		} else {
@@ -163,7 +274,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Thu May 21 2020 12:17:17 GMT+0200 (GMT+02:00)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Sun Jun 07 2020 19:30:46 GMT+0200 (GMT+02:00)
 </footer>
 
 <script> prettyPrint(); </script>

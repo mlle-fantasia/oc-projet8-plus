@@ -30,7 +30,6 @@
 	Model.prototype.create = function (data, callback) {
 		if (!data) return;
 		callback = callback || function () {};
-		console.log("model.create type : ", data.type);
 		if (data.type === "lists") {
 			var newItem = {
 				title: data.title.trim(),
@@ -84,7 +83,6 @@
 	 * @param {function} callback Le callback
 	 */
 	Model.prototype.update = function (id, type, data, callback) {
-		console.log("model.update type : ", type, data);
 		this.storage.save(data, type, callback, id);
 	};
 

@@ -35,7 +35,6 @@
 		});
 
 		self.view.bind("itemEditDone", function (item, type) {
-			console.log("itemEditDone type : ", type);
 			self.editItemSave(item.id, item.title, type);
 		});
 
@@ -98,7 +97,6 @@
 					if (data[0].date) data2.dateList = data[0].date;
 					self.view.render("showEntries", data2);
 					self.view.bind("date", function (item) {
-						console.log("item date change", item);
 						self.model.update(parseInt(item.id), "lists", { date: item.date, listCopiee: "false" }, function () {});
 					});
 				},
@@ -189,7 +187,6 @@
 	 */
 	Controller.prototype.addItem = function (data) {
 		var self = this;
-		console.log("controller.addItem data", data);
 		if (data.title.trim() === "") {
 			return;
 		}
@@ -214,13 +211,11 @@
 					let todoToEdit;
 					for (let i = 0; i < data[0].todos.length; i++) {
 						const todo = data[0].todos[i];
-						console.log("todo.id, id", todo.id, id);
 						if (todo.id === id) {
 							todoToEdit = todo;
 							break;
 						}
 					}
-					console.log("todoToEdit", todoToEdit);
 					self.view.render("editItem", { id: todoToEdit.id, title: todoToEdit.title });
 				},
 				"lists"
@@ -245,7 +240,6 @@
 	Controller.prototype.editItemSave = function (id, title, type) {
 		var self = this;
 		title = title.trim();
-		console.log("controller.edititemSave type : ", type);
 		if (title.length !== 0) {
 			self.model.read(
 				id,
@@ -253,7 +247,6 @@
 					self.model.update(id, type, { title: title }, function () {
 						let item = { id: id, title: title };
 						if (data[0].date) item.date = data[0].date;
-						console.log("data[0].date", data[0].date);
 						self.view.render("editItemDone", item);
 					});
 				},
@@ -353,7 +346,6 @@
 		self.model.read(
 			{ completed: !completed },
 			function (data) {
-				console.log("data", data);
 				data.forEach(function (item) {
 					self.toggleComplete(item.id, completed, true, "todos");
 				});
@@ -431,10 +423,8 @@
 		if (currentPage === "") {
 			this._activeRoute = "All";
 		}
-		console.log("coucou");
 		self.model.read(
 			function (lists) {
-				console.log("lists", lists);
 				for (let i = 0; i < lists.length; i++) {
 					const list = lists[i];
 					let dateNow = new Date();
@@ -442,7 +432,6 @@
 					list.date = new Date(list.date);
 					if (list.date) list.date.setHours(0, 0, 0, 0);
 					if (list.date && list.listCopiee === "false" && list.date.getTime() === dateNow.getTime()) {
-						console.log("list", list);
 						for (let i = 0; i < list.todos.length; i++) {
 							const todo = list.todos[i];
 							todo.type = "todos";

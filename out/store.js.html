@@ -57,6 +57,7 @@
 		if (!localStorage[name]) {
 			var data = {
 				todos: [],
+				lists: [],
 			};
 
 			localStorage[name] = JSON.stringify(data);
@@ -76,18 +77,27 @@
 	 *	 // retourne tous les todo qui ont comme propriété 'foo' === 'bar' &amp;&amp; 'hello' === 'world'
 	 * });
 	 */
-	Store.prototype.find = function (query, callback) {
-		if (!callback) {
-			return;
+	Store.prototype.find = function (query, callback, type) {
+		if (!callback) return;
+		var dataBase = JSON.parse(localStorage[this._dbName]);
+
+		if (Number.isInteger(parseInt(type))) {
+			var listToUpdate = {};
+			for (var i = 0; i &lt; dataBase.lists.length; i++) {
+				const list = dataBase.lists[i];
+				if (list.id === parseInt(type)) {
+					listToUpdate = list;
+				}
+			}
+			var items = listToUpdate.todos;
+		} else {
+			var items = dataBase[type];
 		}
-
-		var todos = JSON.parse(localStorage[this._dbName]).todos;
-
 		callback.call(
 			this,
-			todos.filter(function (todo) {
+			items.filter(function (item) {
 				for (var q in query) {
-					if (query[q] !== todo[q]) {
+					if (query[q] !== item[q]) {
 						return false;
 					}
 				}
@@ -101,9 +111,9 @@
 	 *
 	 * @param {function} callback The callback
 	 */
-	Store.prototype.findAll = function (callback) {
+	Store.prototype.findAll = function (callback, type) {
 		callback = callback || function () {};
-		callback.call(this, JSON.parse(localStorage[this._dbName]).todos);
+		callback.call(this, JSON.parse(localStorage[this._dbName])[type]);
 	};
 
 	/**
@@ -111,37 +121,58 @@
 	 * si non, elle ajoute la todo
 	 *
 	 * @param {object} updateData la todo à enregistrer
+	 * @param {string} type le type de l'item : list | todo
 	 * @param {function} callback Le callback
 	 * @param {number} id L'id de la todo à mettre à jour
 	 */
-	Store.prototype.save = function (updateData, callback, id) {
-		var data = JSON.parse(localStorage[this._dbName]);
-		var todos = data.todos;
-
+	Store.prototype.save = function (updateData, type, callback, id) {
 		callback = callback || function () {};
-
-		// If an ID was actually given, find the item and update each property
-		if (id) {
-			for (var i = 0; i &lt; todos.length; i++) {
-				if (todos[i].id === id) {
-					for (var key in updateData) {
-						todos[i][key] = updateData[key];
-					}
-					break;
+		var data = JSON.parse(localStorage[this._dbName]);
+		if (Number.isInteger(parseInt(type))) {
+			var listToUpdate = {};
+			for (var i = 0; i &lt; data.lists.length; i++) {
+				const list = data.lists[i];
+				if (list.id === parseInt(type)) {
+					listToUpdate = list;
 				}
 			}
-
-			localStorage[this._dbName] = JSON.stringify(data);
-			callback.call(this, todos);
+			if (id) {
+				for (var j = 0; j &lt; listToUpdate.todos.length; j++) {
+					const todo = listToUpdate.todos[j];
+					if (todo.id === id) {
+						for (var key in updateData) {
+							todo[key] = updateData[key];
+						}
+						break;
+					}
+				}
+			} else {
+				var newId = Date.now();
+				updateData.id = parseInt(newId);
+				listToUpdate.todos.push(updateData);
+			}
 		} else {
-			// Generate an ID
-			var newId = Date.now();
-			// Assign an ID
-			updateData.id = parseInt(newId);
-			todos.push(updateData);
-			localStorage[this._dbName] = JSON.stringify(data);
-			callback.call(this, [updateData]);
+			var items = type === "lists" ? data.lists : data.todos;
+			// S'il y a un id dans updateData, c'est qu'il faut mettre à jour une data existante sinon c'est qu'il faut en créer une
+			if (id) {
+				for (var i = 0; i &lt; items.length; i++) {
+					if (items[i].id === id) {
+						for (var key in updateData) {
+							items[i][key] = updateData[key];
+						}
+						break;
+					}
+				}
+			} else {
+				// Generate an ID
+				var newId = Date.now();
+				// Assign an ID
+				updateData.id = parseInt(newId);
+				items.push(updateData);
+			}
 		}
+		localStorage[this._dbName] = JSON.stringify(data);
+		callback.call(this, [updateData]);
 	};
 
 	/**
@@ -150,33 +181,34 @@
 	 * @param {number} id L'ID de la todo à supprimer
 	 * @param {function} callback Le callback
 	 */
-	Store.prototype.remove = function (id, callback) {
-		var data = JSON.parse(localStorage[this._dbName]);
-		var todos = data.todos;
-		/* var todoId;
+	Store.prototype.remove = function (id, callback, type) {
+		var dataBase = JSON.parse(localStorage[this._dbName]);
 
-		for (var i = 0; i &lt; todos.length; i++) {
-			if (todos[i].id == id) {
-				todoId = todos[i].id;
+		if (Number.isInteger(parseInt(type))) {
+			var listToUpdate = {};
+			for (var i = 0; i &lt; dataBase.lists.length; i++) {
+				const list = dataBase.lists[i];
+				if (list.id === parseInt(type)) {
+					listToUpdate = list;
+					break;
+				}
 			}
+			var items = listToUpdate.todos;
+		} else {
+			var items = dataBase[type];
 		}
 
-		for (var i = 0; i &lt; todos.length; i++) {
-			if (todos[i].id == todoId) {
-				todos.splice(i, 1);
-			}
-		} */
-		var todoPosition;
+		var itemPosition;
 
-		for (var i = 0; i &lt; todos.length; i++) {
-			if (todos[i].id == id) {
-				todoPosition = i;
+		for (var i = 0; i &lt; items.length; i++) {
+			if (items[i].id == id) {
+				itemPosition = i;
 			}
 		}
-		todos.splice(todoPosition, 1);
+		items.splice(itemPosition, 1);
 
-		localStorage[this._dbName] = JSON.stringify(data);
-		callback.call(this, todos);
+		localStorage[this._dbName] = JSON.stringify(dataBase);
+		callback.call(this, items);
 	};
 
 	/**
@@ -210,7 +242,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Thu May 21 2020 12:17:17 GMT+0200 (GMT+02:00)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Sun Jun 07 2020 19:30:46 GMT+0200 (GMT+02:00)
 </footer>
 
 <script> prettyPrint(); </script>

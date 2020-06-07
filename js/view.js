@@ -136,7 +136,6 @@
 	 *
 	 */
 	View.prototype._editItemDone = function (id, title, date) {
-		console.log("id, title, date", id, title, date);
 		var listItem = qs('[data-id="' + id + '"]');
 
 		if (!listItem) {
@@ -294,7 +293,6 @@
 				if (event.keyCode === self.ENTER_KEY) {
 					let type = document.location.hash === "" || document.location.hash.split("/")[1] !== "lists" ? "todos" : "lists";
 					if (type === "lists" && document.location.hash.split("/")[2]) type = document.location.hash.split("/")[2];
-					console.log("view.bind.newTodo type : ", type);
 					let data = {
 						type: type,
 						title: self.$newTodo.value,
@@ -319,7 +317,6 @@
 			});
 		} else if (event === "toggleAll") {
 			$on(qs(".toggle-all"), "click", function () {
-				console.log("this.checked", this.checked);
 				handler({ completed: this.checked });
 			});
 		} else if (event === "date") {

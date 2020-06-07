@@ -129,7 +129,6 @@
 	 *
 	 */
 	Template.prototype.getDataToShow = function (data) {
-		console.log("data", data);
 		var date = new Date();
 		var objData = {
 			title: "",

@@ -54,61 +54,98 @@
 		self.model = model;
 		self.view = view;
 
-		self.view.bind("newTodo", function (title) {
-			self.addItem(title);
+		self.view.bind("newTodo", function (data) {
+			self.addItem(data);
 		});
 
-		self.view.bind("itemEdit", function (item) {
-			self.editItem(item.id);
+		self.view.bind("itemEdit", function (item, type) {
+			self.editItem(item.id, type);
 		});
 
-		self.view.bind("itemEditDone", function (item) {
-			self.editItemSave(item.id, item.title);
+		self.view.bind("itemEditDone", function (item, type) {
+			self.editItemSave(item.id, item.title, type);
 		});
 
-		self.view.bind("itemEditCancel", function (item) {
-			self.editItemCancel(item.id);
+		self.view.bind("itemEditCancel", function (item, type) {
+			self.editItemCancel(item.id, type);
 		});
 
-		self.view.bind("itemRemove", function (item) {
-			self.removeItem(item.id);
+		self.view.bind("itemRemove", function (item, type) {
+			self.removeItem(item.id, type);
 		});
 
-		self.view.bind("itemToggle", function (item) {
-			self.toggleComplete(item.id, item.completed);
+		self.view.bind("itemToggle", function (item, type) {
+			self.toggleComplete(item.id, item.completed, false, type);
 		});
 
 		self.view.bind("removeCompleted", function () {
 			self.removeCompletedItems();
 		});
 
-		self.view.bind("toggleAll", function (status) {
+		/* 		self.view.bind("toggleAll", function (status) {
 			self.toggleAll(status.completed);
-		});
+		}); */
 	}
 
 	/**
 	 *
-	 * Point d'entrée de l'application, elle reçoit la route de mandé en paramettre et appelle d'autres fonctions pour afficher la page
+	 * Point d'entrée de l'application, elle reçoit la route demandé en paramettre et appelle d'autres fonctions pour afficher la page
 	 *
 	 * @param {string} locationHash la route demandée : '' | 'active' | 'completed'
 	 */
 	Controller.prototype.setView = function (locationHash) {
-		var route = locationHash.split("/")[1];
+		var self = this;
+
+		var tabroute = locationHash.split("/");
+		var route = tabroute[1];
 		var page = route || "";
-		this._updateFilterState(page);
+		var list_id = "";
+		if (tabroute[2]) list_id = tabroute[2];
+
+		this._updateFilterState(page, list_id);
 	};
 
 	/**
-	 * lit toutes les todos existantes et les affiche
+	 * lit toutes les todos existantes et les envoie à la vue
 	 *
 	 *
 	 */
-	Controller.prototype.showAll = function () {
+	Controller.prototype.showAll = function (list_id) {
 		var self = this;
-		self.model.read(function (data) {
-			self.view.render("showEntries", data);
-		});
+
+		if (list_id) {
+			self.model.read(
+				list_id,
+				function (data) {
+					let data2 = {
+						titleList: data[0].title,
+						type: "todos",
+						data: data[0].todos,
+					};
+					if (data[0].date) data2.dateList = data[0].date;
+					self.view.render("showEntries", data2);
+					self.view.bind("date", function (item) {
+						self.model.update(parseInt(item.id), "lists", { date: item.date, listCopiee: "false" }, function () {});
+					});
+				},
+				"lists"
+			);
+		} else {
+			self.model.read(
+				function (data) {
+					let data2 = {
+						type: "todos",
+						data: data,
+					};
+					self.view.render("showEntries", data2);
+					self.view.bind("toggleAll", function (status) {
+						self.toggleAll(status.completed);
+					});
+				},
+				{},
+				"todos"
+			);
+		}
 	};
 
 	/**
@@ -117,10 +154,18 @@
 	 */
 	Controller.prototype.showActive = function () {
 		var self = this;
-		self.model.read({ completed: false }, function (data) {
-			console.log("data controller", data);
-			self.view.render("showEntries", data);
-		});
+		self.model.read(
+			{ completed: false },
+			function (data) {
+				let data2 = {
+					type: "todos",
+					data: data,
+				};
+
+				self.view.render("showEntries", data2);
+			},
+			"todos"
+		);
 	};
 
 	/**
@@ -129,9 +174,37 @@
 	 */
 	Controller.prototype.showCompleted = function () {
 		var self = this;
-		self.model.read({ completed: true }, function (data) {
-			self.view.render("showEntries", data);
-		});
+		self.model.read(
+			{ completed: true },
+			function (data) {
+				let data2 = {
+					type: "todos",
+					data: data,
+				};
+				self.view.render("showEntries", data2);
+			},
+			"todos"
+		);
+	};
+
+	/**
+	 * lit toutes les todos existantes et les affiche
+	 *
+	 *
+	 */
+	Controller.prototype.showLists = function () {
+		var self = this;
+		self.model.read(
+			function (data) {
+				let data2 = {
+					type: "lists",
+					data: data,
+				};
+				self.view.render("showEntries", data2);
+			},
+			{},
+			"lists"
+		);
 	};
 
 	/**
@@ -140,29 +213,50 @@
 	 *
 	 * @param {string} title Le titre de la todo
 	 */
-	Controller.prototype.addItem = function (title) {
+	Controller.prototype.addItem = function (data) {
 		var self = this;
-
-		if (title.trim() === "") {
+		if (data.title.trim() === "") {
 			return;
 		}
 
-		self.model.create(title, function () {
+		self.model.create(data, function () {
 			self.view.render("clearNewTodo");
 			self._filter(true);
 		});
 	};
 
 	/**
-	 * mettre la todo en mode édition : lit la todo dans le model et transmet les info à la vue pour qu'elle passe en mode edition
+	 * mettre la todo en mode édition : lit la todo dans le model et transmet les infos à la vue pour qu'elle passe en mode edition
 	 *
 	 * @param {number} id L'id de la todo qui doit être éditée
 	 */
-	Controller.prototype.editItem = function (id) {
+	Controller.prototype.editItem = function (id, type) {
 		var self = this;
-		self.model.read(id, function (data) {
-			self.view.render("editItem", { id: id, title: data[0].title });
-		});
+		if (Number.isInteger(parseInt(type))) {
+			self.model.read(
+				type,
+				function (data) {
+					let todoToEdit;
+					for (let i = 0; i &lt; data[0].todos.length; i++) {
+						const todo = data[0].todos[i];
+						if (todo.id === id) {
+							todoToEdit = todo;
+							break;
+						}
+					}
+					self.view.render("editItem", { id: todoToEdit.id, title: todoToEdit.title });
+				},
+				"lists"
+			);
+		} else {
+			self.model.read(
+				id,
+				function (data) {
+					self.view.render("editItem", { id: id, title: data[0].title });
+				},
+				type
+			);
+		}
 	};
 
 	/**
@@ -171,17 +265,23 @@
 	 * @param {number} id L'id de la todo
 	 * @param {string} title le nouveau titre de la todo
 	 */
-	Controller.prototype.editItemSave = function (id, title) {
-		console.log("title", title);
+	Controller.prototype.editItemSave = function (id, title, type) {
 		var self = this;
 		title = title.trim();
-
 		if (title.length !== 0) {
-			self.model.update(id, { title: title }, function () {
-				self.view.render("editItemDone", { id: id, title: title });
-			});
+			self.model.read(
+				id,
+				function (data) {
+					self.model.update(id, type, { title: title }, function () {
+						let item = { id: id, title: title };
+						if (data[0].date) item.date = data[0].date;
+						self.view.render("editItemDone", item);
+					});
+				},
+				type
+			);
 		} else {
-			self.removeItem(id);
+			self.removeItem(id, type);
 		}
 	};
 
@@ -192,9 +292,13 @@
 	 */
 	Controller.prototype.editItemCancel = function (id) {
 		var self = this;
-		self.model.read(id, function (data) {
-			self.view.render("editItemDone", { id: id, title: data[0].title });
-		});
+		self.model.read(
+			id,
+			function (data) {
+				self.view.render("editItemDone", { id: id, title: data[0].title });
+			},
+			"todos"
+		);
 	};
 
 	/**
@@ -203,23 +307,16 @@
 	 *
 	 * @param {number} id L'id de la todo
 	 */
-	Controller.prototype.removeItem = function (id) {
+	Controller.prototype.removeItem = function (id, type) {
 		var self = this;
 
-		// code inutile 1-
-		/* 		var items;
-		self.model.read(function (data) {
-			items = data;
-		});
-				items.forEach(function (item) {
-			if (item.id === id) {
-				console.log("Element with ID: " + id + " has been removed.");
-			}
-		});
- */
-		self.model.remove(id, function () {
-			self.view.render("removeItem", id);
-		});
+		self.model.remove(
+			id,
+			function () {
+				self.view.render("removeItem", id);
+			},
+			type
+		);
 
 		self._filter();
 	};
@@ -231,11 +328,15 @@
 	 */
 	Controller.prototype.removeCompletedItems = function () {
 		var self = this;
-		self.model.read({ completed: true }, function (data) {
-			data.forEach(function (item) {
-				self.removeItem(item.id);
-			});
-		});
+		self.model.read(
+			{ completed: true },
+			function (data) {
+				data.forEach(function (item) {
+					self.removeItem(item.id, "todos");
+				});
+			},
+			"todos"
+		);
 
 		self._filter();
 	};
@@ -249,9 +350,9 @@
 	 * @param {boolean} completed statut de la todo 'completed' ou non
 	 * @param {boolean|undefined} silent si undefined re-filtre les todos
 	 */
-	Controller.prototype.toggleComplete = function (id, completed, silent) {
+	Controller.prototype.toggleComplete = function (id, completed, silent, type) {
 		var self = this;
-		self.model.update(id, { completed: completed }, function () {
+		self.model.update(id, type, { completed: completed }, function () {
 			self.view.render("elementComplete", {
 				id: id,
 				completed: completed,
@@ -270,11 +371,15 @@
 	 */
 	Controller.prototype.toggleAll = function (completed) {
 		var self = this;
-		self.model.read({ completed: !completed }, function (data) {
-			data.forEach(function (item) {
-				self.toggleComplete(item.id, completed, true);
-			});
-		});
+		self.model.read(
+			{ completed: !completed },
+			function (data) {
+				data.forEach(function (item) {
+					self.toggleComplete(item.id, completed, true, "todos");
+				});
+			},
+			"todos"
+		);
 
 		self._filter();
 	};
@@ -298,7 +403,7 @@
 			});
 
 			self.view.render("toggleAll", { checked: todos.completed === todos.total });
-			self.view.render("contentBlockVisibility", { visible: todos.total > 0 });
+			//self.view.render("contentBlockVisibility", { visible: todos.total > 0 });
 		});
 	};
 
@@ -312,7 +417,6 @@
 	 */
 	Controller.prototype._filter = function (force) {
 		var activeRoute = this._activeRoute.charAt(0).toUpperCase() + this._activeRoute.substr(1);
-
 		// Update the elements on the page, which change with each completed todo
 		this._updateCount();
 
@@ -320,7 +424,11 @@
 		// re-create the todo item elements, calling:
 		//   this.show[All|Active|Completed]();
 		if (force || this._lastActiveRoute !== "All" || this._lastActiveRoute !== activeRoute) {
-			this["show" + activeRoute]();
+			if (this._listId) {
+				this.showAll(this._listId);
+			} else {
+				this["show" + activeRoute]();
+			}
 		}
 
 		this._lastActiveRoute = activeRoute;
@@ -333,18 +441,42 @@
 	 * @param {string} currentPage  la route active : '' | 'active' | 'completed'
 	 *
 	 */
-	Controller.prototype._updateFilterState = function (currentPage) {
+	Controller.prototype._updateFilterState = function (currentPage, list_id) {
 		// Store a reference to the active route, allowing us to re-filter todo
 		// items as they are marked complete or incomplete.
+		var self = this;
 		this._activeRoute = currentPage;
+		this._listId = list_id ? list_id : "";
 
 		if (currentPage === "") {
 			this._activeRoute = "All";
 		}
+		self.model.read(
+			function (lists) {
+				for (let i = 0; i &lt; lists.length; i++) {
+					const list = lists[i];
+					let dateNow = new Date();
+					dateNow.setHours(0, 0, 0, 0);
+					list.date = new Date(list.date);
+					if (list.date) list.date.setHours(0, 0, 0, 0);
+					if (list.date &amp;&amp; list.listCopiee === "false" &amp;&amp; list.date.getTime() === dateNow.getTime()) {
+						for (let i = 0; i &lt; list.todos.length; i++) {
+							const todo = list.todos[i];
+							todo.type = "todos";
+							self.addItem(todo);
+						}
+						self.model.update(list.id, "lists", { listCopiee: "true" }, function () {});
+					}
+				}
+			},
+			{},
+			"lists"
+		);
 
 		this._filter();
-
-		this.view.render("setFilter", currentPage);
+		if (currentPage !== "lists") {
+			this.view.render("setFilter", currentPage);
+		}
 	};
 
 	// Export to window
@@ -367,7 +499,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Thu May 21 2020 12:17:17 GMT+0200 (GMT+02:00)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Sun Jun 07 2020 19:30:46 GMT+0200 (GMT+02:00)
 </footer>
 
 <script> prettyPrint(); </script>
