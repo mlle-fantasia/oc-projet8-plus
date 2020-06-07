@@ -318,13 +318,17 @@
 				handler();
 			});
 		} else if (event === "toggleAll") {
-			console.log("toggleAll", document.querySelector("#toggle-all"));
-			/* qs(".toggle-all").addEventListener("click", function () {
-				console.log("coucou");
-			}); */
 			$on(qs(".toggle-all"), "click", function () {
 				console.log("this.checked", this.checked);
 				handler({ completed: this.checked });
+			});
+		} else if (event === "date") {
+			$on(qs(".new-date"), "change", function () {
+				let type = document.location.hash === "" || document.location.hash.split("/")[1] !== "lists" ? "todos" : "lists";
+				if (type === "lists" && document.location.hash.split("/")[2]) {
+					type = document.location.hash.split("/")[2];
+					handler({ id: type, date: qs(".new-date").value });
+				}
 			});
 		} else if (event === "itemEdit") {
 			$delegate(self.$todoList, "li label", "dblclick", function () {

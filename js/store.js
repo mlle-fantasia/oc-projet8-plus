@@ -100,7 +100,7 @@
 	Store.prototype.save = function (updateData, type, callback, id) {
 		callback = callback || function () {};
 		var data = JSON.parse(localStorage[this._dbName]);
-		console.log("store.save type : ", type);
+		console.log("store.save parameters : ", updateData, type, callback, id);
 		if (Number.isInteger(parseInt(type))) {
 			var listToUpdate = {};
 			for (var i = 0; i < data.lists.length; i++) {
@@ -128,6 +128,7 @@
 			var items = type === "lists" ? data.lists : data.todos;
 			// S'il y a un id dans updateData, c'est qu'il faut mettre à jour une data existante sinon c'est qu'il faut en créer une
 			if (id) {
+				console.log("store.save id : ", id);
 				for (var i = 0; i < items.length; i++) {
 					if (items[i].id === id) {
 						for (var key in updateData) {

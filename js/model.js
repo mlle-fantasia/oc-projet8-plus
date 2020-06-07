@@ -84,7 +84,7 @@
 	 * @param {function} callback Le callback
 	 */
 	Model.prototype.update = function (id, type, data, callback) {
-		console.log("model.update type : ", type);
+		console.log("model.update type : ", type, data);
 		this.storage.save(data, type, callback, id);
 	};
 

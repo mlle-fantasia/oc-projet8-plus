@@ -55,9 +55,9 @@
 			self.removeCompletedItems();
 		});
 
-		self.view.bind("toggleAll", function (status) {
+		/* 		self.view.bind("toggleAll", function (status) {
 			self.toggleAll(status.completed);
-		});
+		}); */
 	}
 
 	/**
@@ -97,6 +97,10 @@
 					};
 					if (data[0].date) data2.dateList = data[0].date;
 					self.view.render("showEntries", data2);
+					self.view.bind("date", function (item) {
+						console.log("item date change", item);
+						self.model.update(parseInt(item.id), "lists", { date: item.date, listCopiee: "false" }, function () {});
+					});
 				},
 				"lists"
 			);
@@ -204,11 +208,9 @@
 	Controller.prototype.editItem = function (id, type) {
 		var self = this;
 		if (Number.isInteger(parseInt(type))) {
-			console.log("type", type);
 			self.model.read(
 				type,
 				function (data) {
-					console.log("data", data);
 					let todoToEdit;
 					for (let i = 0; i < data[0].todos.length; i++) {
 						const todo = data[0].todos[i];

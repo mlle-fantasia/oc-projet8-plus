@@ -177,6 +177,8 @@
 				'<input class="new-date" type="date" id="start" name="trip-start" value=' +
 				date +
 				">";
+			objData.todoCount = "";
+			objData.filters = "";
 		}
 
 		return objData;
