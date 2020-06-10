@@ -50,9 +50,9 @@
 			self.toggleComplete(item.id, item.completed, false, type);
 		});
 
-		self.view.bind("removeCompleted", function () {
+		/* self.view.bind("removeCompleted", function () {
 			self.removeCompletedItems();
-		});
+		}); */
 
 		/* 		self.view.bind("toggleAll", function (status) {
 			self.toggleAll(status.completed);
@@ -112,6 +112,9 @@
 					self.view.render("showEntries", data2);
 					self.view.bind("toggleAll", function (status) {
 						self.toggleAll(status.completed);
+					});
+					self.view.bind("removeCompleted", function () {
+						self.removeCompletedItems();
 					});
 				},
 				{},

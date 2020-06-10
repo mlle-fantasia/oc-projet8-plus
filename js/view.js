@@ -66,8 +66,8 @@
 	};
 
 	View.prototype._clearCompletedButton = function (completedCount, visible) {
-		this.$clearCompleted.innerHTML = this.template.clearCompletedButton(completedCount);
-		this.$clearCompleted.style.display = visible ? "block" : "none";
+		qs(".clear-completed").innerHTML = this.template.clearCompletedButton(completedCount);
+		qs(".clear-completed").style.display = visible ? "block" : "none";
 	};
 
 	/**
@@ -175,7 +175,7 @@
 				self.$labelNewTodo.innerHTML = objData.inputNew;
 				self.$title.innerHTML = parameter.titleList ? parameter.titleList : objData.title;
 				self.$sectionToggleAll.innerHTML = objData.toggleAll;
-				self.$clearCompleted.innerHTML = objData.clearCompleted;
+				qs(".clear-completed").innerHTML = objData.clearCompleted;
 				self.$btnShowList.innerHTML = objData.btnShowList;
 				self.$todoCount.innerHTML = objData.todoCount;
 				self.$filters.innerHTML = objData.filters;
@@ -312,7 +312,7 @@
 				handler(data);
 			});
 		} else if (event === "removeCompleted") {
-			$on(self.$clearCompleted, "click", function () {
+			$on(qs(".clear-completed"), "click", function () {
 				handler();
 			});
 		} else if (event === "toggleAll") {

@@ -159,7 +159,8 @@
 				'<label class="container" for="toggle-all">Marquer toutes les todos à faites' +
 				'<input class="toggle-all" id="toggle-all" type="checkbox">' +
 				'<span class="toggle-all checkmark"></span>' +
-				"</label>";
+				"</label>" +
+				'<div class="clear-completed">Supprimer les faites</div>';
 			objData.clearCompleted = this.clearCompletedButton(data.data);
 			objData.filters =
 				'<li><a href="#/" class="selected">toutes</a></li>' +
