@@ -176,7 +176,8 @@
 				'<label class="label-date" for="date">Date : </label>' +
 				'<input class="new-date" type="date" id="start" name="trip-start" value=' +
 				date +
-				">";
+				">" +
+				'<div class="clear-completed">Supprimer les faites</div>';
 			objData.todoCount = "";
 			objData.filters = "";
 		}

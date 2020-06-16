@@ -99,6 +99,9 @@
 					self.view.bind("date", function (item) {
 						self.model.update(parseInt(item.id), "lists", { date: item.date, listCopiee: "false" }, function () {});
 					});
+					self.view.bind("removeCompleted", function () {
+						self.removeCompletedItems();
+					});
 				},
 				"lists"
 			);
@@ -136,8 +139,10 @@
 					type: "todos",
 					data: data,
 				};
-
 				self.view.render("showEntries", data2);
+				self.view.bind("toggleAll", function (status) {
+					self.toggleAll(status.completed);
+				});
 			},
 			"todos"
 		);
@@ -157,6 +162,9 @@
 					data: data,
 				};
 				self.view.render("showEntries", data2);
+				self.view.bind("toggleAll", function (status) {
+					self.toggleAll(status.completed);
+				});
 			},
 			"todos"
 		);
@@ -368,13 +376,14 @@
 	 * - afficher le block des todos ou pas
 	 *
 	 */
-	Controller.prototype._updateCount = function () {
+	Controller.prototype._updateCount = function (routeActive) {
 		var self = this;
 		self.model.getCount(function (todos) {
-			self.view.render("updateElementCount", todos.active);
+			self.view.render("updateElementCount", { active: todos.active, route: routeActive });
 			self.view.render("clearCompletedButton", {
 				completed: todos.completed,
 				visible: todos.completed > 0,
+				route: routeActive,
 			});
 
 			self.view.render("toggleAll", { checked: todos.completed === todos.total });
@@ -392,8 +401,6 @@
 	 */
 	Controller.prototype._filter = function (force) {
 		var activeRoute = this._activeRoute.charAt(0).toUpperCase() + this._activeRoute.substr(1);
-		// Update the elements on the page, which change with each completed todo
-		this._updateCount();
 
 		// If the last active route isn't "All", or we're switching routes, we
 		// re-create the todo item elements, calling:
@@ -405,6 +412,8 @@
 				this["show" + activeRoute]();
 			}
 		}
+		// Update the elements on the page, which change with each completed todo
+		this._updateCount(activeRoute);
 
 		this._lastActiveRoute = activeRoute;
 	};

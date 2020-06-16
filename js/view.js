@@ -65,9 +65,11 @@
 		}
 	};
 
-	View.prototype._clearCompletedButton = function (completedCount, visible) {
-		qs(".clear-completed").innerHTML = this.template.clearCompletedButton(completedCount);
-		qs(".clear-completed").style.display = visible ? "block" : "none";
+	View.prototype._clearCompletedButton = function (parameter) {
+		if (qs(".clear-completed")) {
+			qs(".clear-completed").innerHTML = this.template.clearCompletedButton(parameter.completed);
+			qs(".clear-completed").style.display = parameter.visible && parameter.route !== "Lists" ? "block" : "none";
+		}
 	};
 
 	/**
@@ -175,7 +177,7 @@
 				self.$labelNewTodo.innerHTML = objData.inputNew;
 				self.$title.innerHTML = parameter.titleList ? parameter.titleList : objData.title;
 				self.$sectionToggleAll.innerHTML = objData.toggleAll;
-				qs(".clear-completed").innerHTML = objData.clearCompleted;
+				if (qs(".clear-completed")) qs(".clear-completed").innerHTML = objData.clearCompleted;
 				self.$btnShowList.innerHTML = objData.btnShowList;
 				self.$todoCount.innerHTML = objData.todoCount;
 				self.$filters.innerHTML = objData.filters;
@@ -184,10 +186,12 @@
 				self._removeItem(parameter);
 			},
 			updateElementCount: function () {
-				self.$todoItemCounter.innerHTML = self.template.itemCounter(parameter);
+				if (parameter.route !== "Lists") {
+					self.$todoItemCounter.innerHTML = self.template.itemCounter(parameter.active);
+				}
 			},
 			clearCompletedButton: function () {
-				self._clearCompletedButton(parameter.completed, parameter.visible);
+				self._clearCompletedButton(parameter);
 			},
 			contentBlockVisibility: function () {
 				self.$main.style.display = self.$footer.style.display = parameter.visible ? "block" : "none";
