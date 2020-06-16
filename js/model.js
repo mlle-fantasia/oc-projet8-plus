@@ -38,9 +38,11 @@
 				listCopiee: "false",
 			};
 		} else {
+			let status = false;
+			if (data.completed === true || data.completed === false) status = data.completed;
 			var newItem = {
 				title: data.title.trim(),
-				completed: false,
+				completed: status,
 			};
 		}
 		this.storage.save(newItem, data.type, callback);
