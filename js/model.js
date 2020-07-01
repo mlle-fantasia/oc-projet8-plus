@@ -24,7 +24,7 @@
 	/**
 	 * Crée une nouvelle todo et la transmet au store pour l'enregistrer, une fois fait, le callback est exécuté
 	 *
-	 * @param {string} title Le titre de la todo
+	 * @param {object} data un objet contenant les éléments à créer et le type de l'objet : "lists" ou "todos"
 	 * @param {function} callback Le callback
 	 */
 	Model.prototype.create = function (data, callback) {
@@ -56,11 +56,12 @@
 	 *
 	 * @param {string|number|object} query A query to match models against
 	 * @param {function} callback Le callback
+	 * @param {string} type "lists" ou "todos" permet de savoir où chercher dans les listes ou le todos
 	 *
 	 * @example
-	 * model.read(1, func); // retournera la todo avec l'id 1
-	 * model.read('1'); // idem
-	 * model.read({ foo: 'bar', hello: 'world' }); // retournera la todo avec 'foo' === 'bar' && 'hello' === 'world'
+	 * model.read(1, func, "todos"); // retournera la todo avec l'id 1
+	 * model.read('1', "todos"); // idem
+	 * model.read({ foo: 'bar', hello: 'world' }, "lists"); // retournera la liste avec 'foo' === 'bar' && 'hello' === 'world'
 	 */
 	Model.prototype.read = function (query, callback, type) {
 		var queryType = typeof query;
@@ -82,6 +83,7 @@
 	 *
 	 * @param {number} id L'id de la todo
 	 * @param {object} data Les propriétés à mettre à jour et leur nouvelle valeur
+	 * @param {string} type "lists" ou "todos"
 	 * @param {function} callback Le callback
 	 */
 	Model.prototype.update = function (id, type, data, callback) {
@@ -93,6 +95,7 @@
 	 *
 	 * @param {number} id L'id de la todo
 	 * @param {function} callback Le callback
+	 * @param {string} type "lists" | "todos" | id d'une liste
 	 */
 	Model.prototype.remove = function (id, callback, type) {
 		this.storage.remove(id, callback, type);

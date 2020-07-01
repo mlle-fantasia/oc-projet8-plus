@@ -199,7 +199,7 @@
     
 
     
-    <h4 class="name" id="create"><span class="type-signature"></span>create<span class="signature">(title, callback)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="create"><span class="type-signature"></span>create<span class="signature">(data, callback)</span><span class="type-signature"></span></h4>
     
 
     
@@ -243,13 +243,13 @@
 
         <tr>
             
-                <td class="name"><code>title</code></td>
+                <td class="name"><code>data</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">object</span>
 
 
             
@@ -259,7 +259,7 @@
 
             
 
-            <td class="description last">Le titre de la todo</td>
+            <td class="description last">un objet contenant les éléments à créer et le type de l'objet : "lists" ou "todos"</td>
         </tr>
 
     
@@ -460,7 +460,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="model.js.html">model.js</a>, <a href="model.js.html#line123">line 123</a>
+        <a href="model.js.html">model.js</a>, <a href="model.js.html#line126">line 126</a>
     </li></ul></dd>
     
 
@@ -518,7 +518,7 @@
     
 
     
-    <h4 class="name" id="read"><span class="type-signature"></span>read<span class="signature">(query, callback)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="read"><span class="type-signature"></span>read<span class="signature">(query, callback, type)</span><span class="type-signature"></span></h4>
     
 
     
@@ -613,6 +613,29 @@ Si vous passez une string un nombre ou un objet, la fonction retournera la todo 
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">"lists" ou "todos" permet de savoir où chercher dans les listes ou le todos</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -650,7 +673,7 @@ Si vous passez une string un nombre ou un objet, la fonction retournera la todo 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="model.js.html">model.js</a>, <a href="model.js.html#line65">line 65</a>
+        <a href="model.js.html">model.js</a>, <a href="model.js.html#line66">line 66</a>
     </li></ul></dd>
     
 
@@ -681,9 +704,9 @@ Si vous passez une string un nombre ou un objet, la fonction retournera la todo 
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>model.read(1, func); // retournera la todo avec l'id 1
-model.read('1'); // idem
-model.read({ foo: 'bar', hello: 'world' }); // retournera la todo avec 'foo' === 'bar' &amp;&amp; 'hello' === 'world'</code></pre>
+    <pre class="prettyprint"><code>model.read(1, func, "todos"); // retournera la todo avec l'id 1
+model.read('1', "todos"); // idem
+model.read({ foo: 'bar', hello: 'world' }, "lists"); // retournera la liste avec 'foo' === 'bar' &amp;&amp; 'hello' === 'world'</code></pre>
 
 
 
@@ -693,7 +716,7 @@ model.read({ foo: 'bar', hello: 'world' }); // retournera la todo avec 'foo' ===
     
 
     
-    <h4 class="name" id="remove"><span class="type-signature"></span>remove<span class="signature">(id, callback)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="remove"><span class="type-signature"></span>remove<span class="signature">(id, callback, type)</span><span class="type-signature"></span></h4>
     
 
     
@@ -780,6 +803,29 @@ model.read({ foo: 'bar', hello: 'world' }); // retournera la todo avec 'foo' ===
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">"lists" | "todos" | id d'une liste</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -817,7 +863,7 @@ model.read({ foo: 'bar', hello: 'world' }); // retournera la todo avec 'foo' ===
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="model.js.html">model.js</a>, <a href="model.js.html#line97">line 97</a>
+        <a href="model.js.html">model.js</a>, <a href="model.js.html#line100">line 100</a>
     </li></ul></dd>
     
 
@@ -954,7 +1000,7 @@ model.read({ foo: 'bar', hello: 'world' }); // retournera la todo avec 'foo' ===
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="model.js.html">model.js</a>, <a href="model.js.html#line106">line 106</a>
+        <a href="model.js.html">model.js</a>, <a href="model.js.html#line109">line 109</a>
     </li></ul></dd>
     
 
@@ -990,7 +1036,7 @@ model.read({ foo: 'bar', hello: 'world' }); // retournera la todo avec 'foo' ===
     
 
     
-    <h4 class="name" id="update"><span class="type-signature"></span>update<span class="signature">(id, data, callback)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="update"><span class="type-signature"></span>update<span class="signature">(id, data, type, callback)</span><span class="type-signature"></span></h4>
     
 
     
@@ -1080,6 +1126,29 @@ model.read({ foo: 'bar', hello: 'world' }); // retournera la todo avec 'foo' ===
 
         <tr>
             
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">"lists" ou "todos"</td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>callback</code></td>
             
 
@@ -1137,7 +1206,7 @@ model.read({ foo: 'bar', hello: 'world' }); // retournera la todo avec 'foo' ===
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="model.js.html">model.js</a>, <a href="model.js.html#line87">line 87</a>
+        <a href="model.js.html">model.js</a>, <a href="model.js.html#line89">line 89</a>
     </li></ul></dd>
     
 
@@ -1189,7 +1258,7 @@ model.read({ foo: 'bar', hello: 'world' }); // retournera la todo avec 'foo' ===
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Wed Jun 17 2020 10:39:11 GMT+0200 (GMT+02:00)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Wed Jul 01 2020 09:27:22 GMT+0200 (GMT+02:00)
 </footer>
 
 <script> prettyPrint(); </script>

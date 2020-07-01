@@ -80,6 +80,7 @@
 	/**
 	 * lit toutes les todos existantes et les envoie à la vue
 	 *
+	 * @param {number} list_id  l'id de la liste facultatif
 	 *
 	 */
 	Controller.prototype.showAll = function (list_id) {
@@ -194,7 +195,7 @@
 	 * crée une nouvelle todo, vide le champs titre et filtre les todos (avec this._filter)
 	 * Si le titre est vide, la todo n'est pas ajoutée
 	 *
-	 * @param {string} title Le titre de la todo
+	 * @param {object} data object contenant les données de la todo
 	 */
 	Controller.prototype.addItem = function (data) {
 		var self = this;
@@ -212,6 +213,7 @@
 	 * mettre la todo en mode édition : lit la todo dans le model et transmet les infos à la vue pour qu'elle passe en mode edition
 	 *
 	 * @param {number} id L'id de la todo qui doit être éditée
+	 * @param {string} type "lists" | "todos" | id d'une liste
 	 */
 	Controller.prototype.editItem = function (id, type) {
 		var self = this;
@@ -247,6 +249,7 @@
 	 *
 	 * @param {number} id L'id de la todo
 	 * @param {string} title le nouveau titre de la todo
+	 * @param {string} type "lists" | "todos" | id d'une liste
 	 */
 	Controller.prototype.editItemSave = function (id, title, type) {
 		var self = this;
@@ -289,6 +292,7 @@
 	 * Supprime une todo du DOM et du localstorage
 	 *
 	 * @param {number} id L'id de la todo
+	 * @param {string} type "lists" | "todos" | id d'une liste
 	 */
 	Controller.prototype.removeItem = function (id, type) {
 		var self = this;
@@ -332,6 +336,7 @@
 	 * @param {number} id l'id de la todo à changer de statut
 	 * @param {boolean} completed statut de la todo 'completed' ou non
 	 * @param {boolean|undefined} silent si undefined re-filtre les todos
+	 * @param {string} type "lists" | "todos" | id d'une liste
 	 */
 	Controller.prototype.toggleComplete = function (id, completed, silent, type) {
 		var self = this;
@@ -423,6 +428,7 @@
 	 * et Met à jour le filtre demandé dans la vue
 	 *
 	 * @param {string} currentPage  la route active : '' | 'active' | 'completed'
+	 * @param {number} list_id  id d'une liste facultatif
 	 *
 	 */
 	Controller.prototype._updateFilterState = function (currentPage, list_id) {

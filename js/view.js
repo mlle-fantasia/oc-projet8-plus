@@ -135,6 +135,7 @@
 	 *
 	 * @param {number} id  id de la todo
 	 * @param {string} title titre de la todo
+	 * @param {string} date date de la liste
 	 *
 	 */
 	View.prototype._editItemDone = function (id, title, date) {

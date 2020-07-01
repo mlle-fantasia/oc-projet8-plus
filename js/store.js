@@ -43,6 +43,7 @@
 	 *
 	 * @param {object} query La query
 	 * @param {function} callback Le callback
+	 * @param {string} type "lists", "todos" ou l'id d'une list
 	 *
 	 * @example
 	 * db.find({foo: 'bar', hello: 'world'}, function (data) {
@@ -82,6 +83,7 @@
 	 * Retourne toutes les todos
 	 *
 	 * @param {function} callback The callback
+	 * @param {string} type "lists" ou "todos"
 	 */
 	Store.prototype.findAll = function (callback, type) {
 		callback = callback || function () {};
@@ -93,7 +95,7 @@
 	 * si non, elle ajoute la todo
 	 *
 	 * @param {object} updateData la todo à enregistrer
-	 * @param {string} type le type de l'item : list | todo
+	 * @param {string} type le type de l'item : list | todo | id d'une liste
 	 * @param {function} callback Le callback
 	 * @param {number} id L'id de la todo à mettre à jour
 	 */
@@ -152,6 +154,7 @@
 	 *
 	 * @param {number} id L'ID de la todo à supprimer
 	 * @param {function} callback Le callback
+	 * @param {string} type "lists" | "todos" | id d'une liste
 	 */
 	Store.prototype.remove = function (id, callback, type) {
 		var dataBase = JSON.parse(localStorage[this._dbName]);
